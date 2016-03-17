@@ -9,7 +9,7 @@ noble.on('stateChange', function(state) {
 });
 
 noble.on('discover', function(peripheral) {
-  console.log('peripheral discovered (' + peripheral.id +
+  console.log('peripheral discovered - ' + peripheral.id +
               ' with address <' + peripheral.address +  ', ' + peripheral.addressType + '>,' +
               ' connectable ' + peripheral.connectable + ',' +
               ' RSSI ' + peripheral.rssi + ':');
@@ -35,4 +35,13 @@ noble.on('discover', function(peripheral) {
   }
 
   console.log();
+
+  if (peripheral.advertisement.localName == "Adafruit Bluefruit LE") {
+    console.log("Trying to connect:");
+    peripheral.connect(function(){
+      console.log("connected!");
+
+      console.log(peripheral);
+    });
+  }
 });
