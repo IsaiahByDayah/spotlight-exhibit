@@ -6,6 +6,7 @@ var FEATHER_LOCAL_NAME = "Adafruit Bluefruit LE";
 var UART_SERVICE_UUID = "6e400001b5a3f393e0a9e50e24dcca9e";
 
 var LOG_ALL_FOUND_DEVICES = false;
+var LOG_CORRECT_FOUND_DEVICE = true;
 
 noble.on('stateChange', function(state) {
   if (state === 'poweredOn') {
@@ -46,6 +47,33 @@ noble.on('discover', function(peripheral) {
 
   	// Arduino Feather
 	if ((peripheral.id == FEATHER_PERIFERAL_ID || peripheral.advertisement.localName == FEATHER_LOCAL_NAME) && _.contains(peripheral.advertisement.serviceUuids, UART_SERVICE_UUID)) {
+
+		if (LOG_CORRECT_FOUND_DEVICE){
+			console.log('peripheral discovered - ' + peripheral.id +
+					  ' with address <' + peripheral.address +  ', ' + peripheral.addressType + '>,' +
+					  ' connectable ' + peripheral.connectable + ',' +
+					  ' RSSI ' + peripheral.rssi + ':');
+			console.log('\thello my local name is:');
+			console.log('\t\t' + peripheral.advertisement.localName);
+			console.log('\tcan I interest you in any of the following advertised services:');
+			console.log('\t\t' + JSON.stringify(peripheral.advertisement.serviceUuids));
+
+			var serviceData = peripheral.advertisement.serviceData;
+			if (serviceData && serviceData.length) {
+			console.log('\there is my service data:');
+			for (var i in serviceData) {
+			  console.log('\t\t' + JSON.stringify(serviceData[i].uuid) + ': ' + JSON.stringify(serviceData[i].data.toString('hex')));
+			}
+			}
+			if (peripheral.advertisement.manufacturerData) {
+			console.log('\there is my manufacturer data:');
+			console.log('\t\t' + JSON.stringify(peripheral.advertisement.manufacturerData.toString('hex')));
+			}
+			if (peripheral.advertisement.txPowerLevel !== undefined) {
+			console.log('\tmy TX power level is:');
+			console.log('\t\t' + peripheral.advertisement.txPowerLevel);
+			}
+		}
 
 		console.log("Feather Found. Trying to connect...");
 
@@ -190,7 +218,10 @@ noble.on('discover', function(peripheral) {
 								// 	});
 								// }, 5000);
 
-								var message = new Buffer("Pi -> Arduino", "utf-8");
+								var message = new Buffer("This str is 20 chars", "utf-8");
+								// var message = new Buffer("012345678901234567890123456789\nSecond Message\n", "utf-8");
+								// var message = new Buffer("This is a really long string that is being sent from the pi to the the arduino.\n", "utf-8");
+								// var message = new Buffer("Pi -> Arduino", "utf-8");
 								// var message = new Buffer("1\n", "utf-8");
 
 								characteristic.write(message, true, function(err){
