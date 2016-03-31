@@ -1,6 +1,8 @@
 var noble = require('noble');
 var _ = require('underscore');
 
+var BLE_MAX_CHUNK_SIZE = 20;
+
 var FEATHER_PERIFERAL_ID = "f5ca9cca32ee48fdb72ff891e8682203";
 var FEATHER_LOCAL_NAME = "Adafruit Bluefruit LE";
 var UART_SERVICE_UUID = "6e400001b5a3f393e0a9e50e24dcca9e";
@@ -218,21 +220,63 @@ noble.on('discover', function(peripheral) {
 								// 	});
 								// }, 5000);
 
+								// var message = new Buffer("This str is 21 chars.", "utf-8");
 								var message = new Buffer("This str is 20 chars", "utf-8");
 								// var message = new Buffer("012345678901234567890123456789\nSecond Message\n", "utf-8");
 								// var message = new Buffer("This is a really long string that is being sent from the pi to the the arduino.\n", "utf-8");
 								// var message = new Buffer("Pi -> Arduino", "utf-8");
 								// var message = new Buffer("1\n", "utf-8");
 
-								characteristic.write(message, true, function(err){
+								var message2 = new Buffer(". This str is not\n", "utf-8");
 
-									if (err != null) {
+								// characteristic.write(message, true, function(err){
+
+								// 	if (err != null) {
+								// 		console.log("\tError sending message.\n\n");
+								// 		console.log("\t", err);
+								// 		return;
+								// 	}
+
+								// 	console.log("\tMessage sent: "+message+"\n\n");
+								// });
+
+								// characteristic.write(message2, true, function(err){
+
+								// 	if (err != null) {
+								// 		console.log("\tError sending message.\n\n");
+								// 		console.log("\t", err);
+								// 		return;
+								// 	}
+
+								// 	console.log("\tMessage sent: "+message2+"\n\n");
+								// });
+
+								// var TEST_NUMBER = 3;
+								// for (var num = 0; num < TEST_NUMBER; num++) {
+
+								// 	sendMessage(characteristic, i.toString(), function(err){
+
+								// 		if (err) {
+
+								// 		}
+
+								// 		console.log("Message Sent");
+
+								// 	});
+
+								// }
+
+								var longMessage = "0000000000000000000000000~1111111111111111111111111~";
+								sendMessage(characteristic, longMessage, function(err){
+
+									if (err) {
 										console.log("\tError sending message.\n\n");
 										console.log("\t", err);
 										return;
 									}
 
-									console.log("\tMessage sent: "+message+"\n\n");
+									console.log("\tMessage sent: "+longMessage+"\n\n");
+
 								});
 							}
 
@@ -287,4 +331,73 @@ function dataRecieved(characteristic, data, isNotification){
 	console.log("\tCharacteristic: " + characteristic.uuid);
 	console.log("\tNotification: " + isNotification);
 	console.log("\tData: " + data + "\n");
+}
+
+function sendMessage(characteristic, msg, callback){
+
+	var messages = chunkString(msg, BLE_MAX_CHUNK_SIZE);
+	var goalLength = messages.length;
+
+	var sentMessages = {};
+
+	_.each(messages, function(message, index, list){
+		(function(msg, i){
+
+			var msgBuffer = new Buffer(msg, "utf-8");
+			var key = i.toString();
+
+			sentMessages[key] = {};
+
+			//console.log("SentMessages:", sentMessages);
+
+			characteristic.write(msgBuffer, true, function(err){
+				if (err != null) {
+					//console.log("\tError sending message.\n\n");
+					//console.log("\t", err);
+
+					sentMessages[key].wasSent = true;
+					sentMessages[key].hasError = true;
+					sentMessages[key].error = err;
+
+					checkStatus(sentMessages, goalLength);
+
+					return;
+				}
+
+				//console.log("\tMessage sent: "+i+"\n\n");
+
+				sentMessages[key].wasSent = true;
+				sentMessages[key].hasError = false;
+				sentMessages[key].error = null;
+
+				checkStatus(sentMessages, goalLength);
+
+				return;
+			});
+		})(message, index);
+	});
+
+	function checkStatus() {
+
+		var numSent = 0;
+
+		var wasError;
+
+		for (prop in sentMessages) {
+			if (sentMessages[prop].wasSent) numSent++;
+
+			if (sentMessages[prop].hasError) wasError = sentMessages[prop].error;
+		}
+
+		if (numSent == goalLength) {
+
+			callback(wasError);
+
+		}
+	}
+}
+
+// SOURCE: http://stackoverflow.com/questions/7033639/split-large-string-in-n-size-chunks-in-javascript
+function chunkString(str, length) {
+  return str.match(new RegExp('.{1,' + length + '}', 'g'));
 }

@@ -57,3 +57,13 @@ node_modules
 
 # sftp configuration file
 sftp-config.json
+
+
+
+
+#
+# PROJECT IGNORES
+#
+
+discovery.js
+explore.js
