@@ -39,6 +39,7 @@ noble.on('discover', function(peripheral) {
 		console.log("\t\tAdding event listeners...");
 		wearable.on("ready", function(err){
 			console.log("\t\tWearable ready!");
+			wearable.sendMessage("This is a really long message. Much more than 20 characters.");
 		});
 
 		console.log("\t\tSetting up wearable...");

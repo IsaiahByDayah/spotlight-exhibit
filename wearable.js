@@ -205,7 +205,7 @@ var Wearable = function(peripheral, verbose){
 
 				//console.log("SentMessages:", sentMessages);
 
-				_write.write(msgBuffer, true, function(err){
+				_self._write.write(msgBuffer, true, function(err){
 					if (err) {
 						if (_self._verbose){
 							console.log("\tError sending message.\n\n");
