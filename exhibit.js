@@ -38,19 +38,44 @@ noble.on('discover', function(peripheral) {
 
 		console.log("\t\tAdding event listeners...");
 		wearable.on("ready", function(err){
+
+			if (err) {
+				console.log("\t\tError on ready: " + err.message);
+				return;
+			}
+
 			console.log("\t\tWearable ready!");
 		});
 
 		wearable.on("like", function(err){
+
+			if (err) {
+				console.log("\t\tError on like: " + err.message);
+				return;
+			}
+
 			console.log("\t\tLike recieved!");
 		});
 
 		wearable.on("dismiss", function(err){
+
+			if (err) {
+				console.log("\t\tError on dismiss: " + err.message);
+				return;
+			}
+
 			console.log("\t\tDismiss recieved!");
 		});
 
 		wearable.on("rssi", function(err, rssi, callback){
+
+			if (err) {
+				console.log("\t\tError on rssi update: " + err.message);
+				return;
+			}
+
 			console.log("\t\tRSSI updated!");
+			console.log("\t\t\tCurrent rssi: " + rssi);
 
 			var strength = 0;
 
@@ -58,6 +83,12 @@ noble.on('discover', function(peripheral) {
 		});
 
 		wearable.on("disconnect", function(err){
+
+			if (err) {
+				console.log("\t\tError on disconnect: " + err.message);
+				return;
+			}
+
 			console.log("\t\tWearable disconnected!");
 		});
 
