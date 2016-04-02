@@ -61,7 +61,7 @@ var Wearable = function(peripheral){
 
 		_self._feather.on("message", onMessageRecieved);
 
-		_self._feather.on("rssi", onRssiUpdate;
+		_self._feather.on("rssi", onRssiUpdate);
 
 		_self._feather.setup();
 
@@ -160,6 +160,7 @@ var Wearable = function(peripheral){
 		}
 	};
 
+	// Disconnect from the feather
 	this.disconnect = function(){
 		_self._feather.disconnect();
 	};
