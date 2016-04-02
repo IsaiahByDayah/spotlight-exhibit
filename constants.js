@@ -7,6 +7,9 @@ module.exports = {
 	// Flag for if feathers should be started in verbose mode
 	START_FEATHER_IN_VERBOSE_MODE: false,
 
+	// Flag for if feathers should be started in verbose mode
+	MINIMUM_RSSI_TO_STAY_CONNECTED: 0,
+
 
 
 	/*

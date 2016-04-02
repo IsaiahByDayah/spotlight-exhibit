@@ -141,7 +141,13 @@ var Wearable = function(peripheral){
 		//     Passes along callback function that takes signal strength to send to feather
 		function onRssiUpdate(err, rssi){
 
-			// Trigger 
+			// Disconnect from feather if RSSI is too low
+			if (rssi < CONSTANTS.MINIMUM_RSSI_TO_STAY_CONNECTED) {
+				_self.disconnect();
+				return;
+			}
+
+			// Trigger RSSI callbacks
 			_.each(_self._listeners.rssi, function(callback){
 				callback(err, rssi, function(strength){
 					var signalStrengthMessage = JSON.stringify({
