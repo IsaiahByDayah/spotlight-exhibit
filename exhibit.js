@@ -6,9 +6,8 @@ var Wearable = require('./wearable.js');
 
 //console.log(wearable);
 
-// console.log(function(){
-// 	// Hello World
-// });
+// console.log(Feather);
+// console.log(Feather().isFeather);
 
 noble.on('stateChange', function(state) {
 	if (state === 'poweredOn') {
@@ -25,7 +24,8 @@ noble.on('discover', function(peripheral) {
 	}
 
   	// Check to see if peripheral is a wearable
-	if (isWearable(peripheral)) {
+  	if (new Wearable().isWearable(peripheral)) {
+	// if (Feather.isFeather(peripheral)) {
 
 		if (CONSTANTS.LOG_WEARABLE_DEVICES && !CONSTANTS.LOG_ALL_FOUND_DEVICES){
 			logPeripheral(peripheral);
@@ -34,7 +34,7 @@ noble.on('discover', function(peripheral) {
 		console.log("Wearable Found...");
 
 		console.log("\tCreating new Wearable object...");
-		var wearable = new Wearable(peripheral, false);
+		var wearable = new Wearable(peripheral);
 
 		console.log("\t\tAdding event listeners...");
 		wearable.on("ready", function(err){
@@ -46,15 +46,6 @@ noble.on('discover', function(peripheral) {
 		wearable.setup();
   	}
 });
-
-function isWearable(peripheral){
-	// if ((peripheral.id == WEARABLE_PERIFERAL_ID || peripheral.advertisement.localName == WEARABLE_LOCAL_NAME) && _.contains(peripheral.advertisement.serviceUuids, CONSTANTS.WEARABLE_UART_SERVICE_UUID)) {
-	if (_.contains(peripheral.advertisement.serviceUuids, CONSTANTS.WEARABLE_UART_SERVICE_UUID)) {
-		return true;
-	}
-
-	return false;
-}
 
 function logPeripheral(peripheral){
 	console.log('peripheral discovered - ' + peripheral.id +

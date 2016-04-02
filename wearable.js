@@ -1,7 +1,9 @@
-var CONSTANTS = require('./constants.js');
+var Feather = require('feather-ble');
 var _ = require('underscore');
 
-var Wearable = function(peripheral, verbose){
+var CONSTANTS = require('./constants.js');
+
+var Wearable = function(peripheral){
 
 	/*
 		VARIABLES
@@ -9,28 +11,13 @@ var Wearable = function(peripheral, verbose){
 	// Reference to "this"
 	var _self = this;
 
-	// Should console.logs be printed out
-	this._verbose = verbose;
-
 	// Noble Peripheral Object
-	this._peripheral = peripheral;
+	this._feather = new Feather(peripheral, CONSTANTS.START_FEATHER_IN_VERBOSE_MODE);
 
 	// Wearable's UserID
 	this._userID;
 
-	// Incoming Characteristic
-	this._read;
-
-	// inputBuffer String
-	this._inputBuffer = "";
-
-	// The last full message recieved
-	this._lastMessage;
-
-	// Outgoing Characteristic
-	this._write;
-
-	// If wearable is ready
+	// Flag for if wearable is ready for use
 	this._ready = false;
 
 	// Listener Event callbacks
@@ -44,246 +31,121 @@ var Wearable = function(peripheral, verbose){
 		// When a user dismisses
 		"dismiss": [],
 
-		// When a user disconnects
-		"disconnect": [],
+		// When rssi changes
+		"rssi": [],
 
-		// When the wearable sends any message back
-		"message": []
+		// When a user disconnects
+		"disconnect": []
 	};
 
 
 	/*
 		METHODS
 	*/
+	// Adds Event Listener
 	this.on = function(event, callback){
 		_self._listeners[event].push(callback);
 	};
 
-	// Connects, finds read/white characteristics, grabs the userID from the arduino, and triggers "ready" listeners
+	// Adds Event Listeners to feather. Tells Feather to setup. Grabs userID from feather.
 	this.setup = function(){
+		_self._feather.on("ready", onFeatherReady);
 
-		_self._peripheral.connect(function(err){
+		_self._feather.on("disconnect", onFeatherDisconnected);
 
-			if (err != null) {
-				if (_self._verbose){
-					console.log("\tCould not connect.\n\n");
-					console.log(err);
-				}
+		_self._feather.on("message", onMessageRecieved);
+
+		_self._feather.on("rssi", onRssiUpdate;
+
+		_self._feather.setup();
+
+		// Triggers callbacks of type 'e' passing along err
+		function triggerSimpleCallbacks(e, err){
+			_.each(_self._listeners[e], function(callback){
+				callback(err);
+			});
+		}
+
+		// Callback for when feather is ready
+		//   Requests UserID from feather
+		function onFeatherReady(err){
+			if (err) {
+				triggerSimpleCallbacks("ready", err);
 				return;
 			}
 
-			if (_self._verbose){
-				console.log("\tConnected!\n\n");
-			}
-
-			_self._peripheral.once('disconnect', function(){
-				if (_self._verbose){
-					console.log("\n\nPeripheral disconnected.");
-				}
-
-				// Trigger disconnect callbacks
-				_.each(_self._listeners.disconnect, function(callback){
-					callback();
-				});
-
+			var requestUserIDMessage = JSON.stringify({
+				// Request UserID Message
 			});
 
-			_self._peripheral.discoverServices([CONSTANTS.WEARABLE_UART_SERVICE_UUID], function(err, services){
+			_self._feather.sendMessage(requestUserIDMessage);
+		}
 
-				if (err != null) {
-					if (_self._verbose){
-						console.log("\tError recieving services.\n\n");
-						console.log(err);
-					}
-					return;
+		// Callback for when feather is disconnected
+		//   Trigger disconnect callbacks
+		function onFeatherDisconnected(){
+			triggerSimpleCallbacks("disconnect", null);
+		}
+
+		// Parse message and call appropriate callbacks
+		function onMessageRecieved(msg){
+			switch(msg.msgType){
+				case "UserID":
+					userIDRecieved(msg.data);
+					break;
+				case "Like":
+					likeRecieved(msg.data);
+					break;
+				case "Dismiss":
+					dismissedRecieved(msg.data);
+					break;
+				default:
+					// Unknown message type
+					break;
+			}
+
+			function userIDRecieved(data){
+				_self._userID = data.userID;
+
+				if (_self._userID) {
+					_self._ready = true;
+					triggerSimpleCallbacks("ready", null);
 				}
-
-				if (services.length < 1) {
-					if (_self._verbose){
-						console.log("\tCould not get service(s).\n\n");
-					}
-					return;
+				else {
+					// Trigger with error
+					var err = new Error("Did not retrieve userID from wearable");
+					triggerSimpleCallbacks("ready", err);
 				}
+			}
 
+			function likeRecieved(data){
+				triggerSimpleCallbacks("like", null);
+			}
 
-				var characteristicUUIDs = [CONSTANTS.READ_CHARACTERISTIC_UUID, CONSTANTS.WRITE_CHARACTERISTIC_UUID];
+			function dismissedRecieved(data){
+				triggerSimpleCallbacks("dismiss", null);
+			}
+		}
 
-				services[0].discoverCharacteristics(characteristicUUIDs, function(err, characteristics){
-
-					if (err != null || characteristics.length < 1) {
-						if (_self._verbose){
-							console.log("\tCould not get characteristics for service "+service.uuid+".\n\n");
-						}
-						// console.log("\t" + err);
-						return;
-					}
-
-					if (_self._verbose){
-						console.log("\tCharacteristics found ("+characteristics.length+").\n\n");
-					}
-
-					// console.log(characteristics);
-
-					_.each(characteristics, function(characteristic){
-
-						if (characteristic.uuid == CONSTANTS.READ_CHARACTERISTIC_UUID){
-							if (_self._verbose){
-								console.log("Setting listener for data notification on characteristic "+characteristic.uuid);
-							}
-
-							characteristic.on('read', function(data, isNotification){
-								//console.log("From read.");
-								_self.dataRecieved(characteristic, data, isNotification);
-							});
-
-							if (_self._verbose){
-								console.log("Trying to subscribe to characteristic "+characteristic.uuid+"...");
-							}
-							characteristic.notify(true, function(err){
-
-								if (err != null) {
-									if (_self._verbose){
-										console.log("\tError subscribing.\n\n");
-										console.log("\t", err);
-									}
-									return checkSetupStatus(err);
-								}
-
-								if (_self._verbose){
-									console.log("\tSubscribed.\n\n");
-								}
-								_self._read = characteristic;
-								checkSetupStatus();
-							});
-						}
-
-						if (characteristic.uuid == CONSTANTS.WRITE_CHARACTERISTIC_UUID){
-							_self._write = characteristic;
-							checkSetupStatus();
-						}
+		// Callback for when RSSI updates
+		//   Call RSSI updated callbacks
+		//     Passes along callback function that takes signal strength to send to feather
+		function onRssiUpdate(err, rssi){
+			_.each(_self._listeners.rssi, function(callback){
+				callback(err, rssi, function(strength){
+					var signalStrengthMessage = JSON.stringify({
+						// Update Signal Strength Message
 					});
+
+					_self._feather.sendMessage(signalStrengthMessage);
 				});
 			});
-		});
-
-		function checkSetupStatus(err){
-
-			if (err) {
-				_.each(_self._listeners.ready, function(callback){
-					callback(err);
-				});
-			}
-
-			if (_self._read != null && _self._write != null) {
-
-				_self._ready = true;
-
-				_.each(_self._listeners.ready, function(callback){
-					callback();
-				});
-			}
 		}
 	};
 
-	// Send a message (String) to this wearable with a callback on completion
-	this.sendMessage = function(msg, callback){
-
-		if (msg[msg.length] != CONSTANTS.MESSAGE_TERMINATOR) msg += CONSTANTS.MESSAGE_TERMINATOR;
-
-		var messages = chunkString(msg, CONSTANTS.BLE_MAX_CHUNK_SIZE);
-		var goalLength = messages.length;
-
-		var sentMessages = {};
-
-		_.each(messages, function(message, index, list){
-			(function(msg, i){
-
-				var msgBuffer = new Buffer(msg, "utf-8");
-				var key = i.toString();
-
-				sentMessages[key] = {};
-
-				//console.log("SentMessages:", sentMessages);
-
-				_self._write.write(msgBuffer, true, function(err){
-					if (err) {
-						if (_self._verbose){
-							console.log("\tError sending message.\n\n");
-							console.log("\t", err);
-						}
-
-						sentMessages[key].wasSent = true;
-						sentMessages[key].hasError = true;
-						sentMessages[key].error = err;
-
-						return checkStatus();
-					}
-
-					//console.log("\tMessage sent: "+i+"\n\n");
-
-					sentMessages[key].wasSent = true;
-					sentMessages[key].hasError = false;
-					sentMessages[key].error = null;
-
-					return checkStatus();
-				});
-			})(message, index);
-		});
-
-		function checkStatus() {
-
-			var numSent = 0;
-
-			var wasError;
-
-			for (var prop in sentMessages) {
-				if (sentMessages[prop].wasSent) numSent++;
-
-				if (sentMessages[prop].hasError) wasError = sentMessages[prop].error;
-			}
-
-			if (numSent == goalLength) {
-
-				if (callback) return callback(wasError);
-
-			}
-		}
-
-		// SOURCE: http://stackoverflow.com/questions/7033639/split-large-string-in-n-size-chunks-in-javascript
-		function chunkString(str, length) {
-			return str.match(new RegExp('.{1,' + length + '}', 'g'));
-		}
-	};
-
-	this.dataRecieved = function(characteristic, data, isNotification){
-		if (_self._verbose){
-			console.log("\nData Recieved:");
-			console.log("\tCharacteristic: " + characteristic.uuid);
-			console.log("\tNotification: " + isNotification);
-			console.log("\tData: " + data + "\n");
-		}
-
-		for (var i = 0; i < data.length; i++){
-			var c = String.fromCharCode(data[i]);
-
-			// console.log("Recieved: " + c);
-
-			if (c == CONSTANTS.MESSAGE_TERMINATOR) {
-
-				_self._lastMessage = _self._inputBuffer;
-
-				_self._inputBuffer = "";
-
-				_self.messageFinished();
-			}
-			else {
-				_self._inputBuffer += c;
-			}
-		}
-	};
-
-	this.messageFinished = function(){
-		console.log("Finished message: " + _self._lastMessage);
+	// Returns if the noble peripheral is a wearable-acceptable peripheral
+	this.isWearable = function(peripheral){
+		return new Feather().isFeather(peripheral);
 	};
 };
 
