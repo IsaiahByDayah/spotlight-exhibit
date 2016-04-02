@@ -39,7 +39,26 @@ noble.on('discover', function(peripheral) {
 		console.log("\t\tAdding event listeners...");
 		wearable.on("ready", function(err){
 			console.log("\t\tWearable ready!");
-			wearable.sendMessage("This is a really long message. Much more than 20 characters.");
+		});
+
+		wearable.on("like", function(err){
+			console.log("\t\tLike recieved!");
+		});
+
+		wearable.on("dismiss", function(err){
+			console.log("\t\tDismiss recieved!");
+		});
+
+		wearable.on("rssi", function(err, rssi, callback){
+			console.log("\t\tRSSI updated!");
+
+			var strength = 0;
+
+			callback(strength);
+		});
+
+		wearable.on("disconnect", function(err){
+			console.log("\t\tWearable disconnected!");
 		});
 
 		console.log("\t\tSetting up wearable...");
