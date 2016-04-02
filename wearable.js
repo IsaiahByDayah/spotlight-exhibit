@@ -20,6 +20,12 @@ var Wearable = function(peripheral){
 	// Flag for if wearable is ready for use
 	this._ready = false;
 
+	// Timestamp for when feather was ready
+	this._start;
+
+	// Timestamp for when feather was disconnected
+	this._end;
+
 	// Listener Event callbacks
 	this._listeners = {
 		// When wearable is connected and ready
@@ -74,6 +80,8 @@ var Wearable = function(peripheral){
 				return;
 			}
 
+			_self._start = new Date();
+
 			var requestUserIDMessage = JSON.stringify({
 				// Request UserID Message
 			});
@@ -84,6 +92,7 @@ var Wearable = function(peripheral){
 		// Callback for when feather is disconnected
 		//   Trigger disconnect callbacks
 		function onFeatherDisconnected(){
+			_self._end = new Date();
 			triggerSimpleCallbacks("disconnect", null);
 		}
 
@@ -131,6 +140,8 @@ var Wearable = function(peripheral){
 		//   Call RSSI updated callbacks
 		//     Passes along callback function that takes signal strength to send to feather
 		function onRssiUpdate(err, rssi){
+
+			// Trigger 
 			_.each(_self._listeners.rssi, function(callback){
 				callback(err, rssi, function(strength){
 					var signalStrengthMessage = JSON.stringify({
@@ -141,6 +152,10 @@ var Wearable = function(peripheral){
 				});
 			});
 		}
+	};
+
+	this.disconnect = function(){
+		_self._feather.disconnect();
 	};
 
 	// Returns if the noble peripheral is a wearable-acceptable peripheral
