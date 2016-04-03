@@ -14,4 +14,5 @@
 
 ### Libraries used:
 - Noble ([Source](https://github.com/sandeepmistry/noble))
+- feather-ble ([Source](https://github.com/jordankid93/feather-ble))
 - Underscore ([Source](http://underscorejs.org))
