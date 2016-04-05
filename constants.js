@@ -15,5 +15,14 @@ module.exports = {
 	LOG_ALL_FOUND_DEVICES:  false,
 
 	// Flag for if discovered Feather peripherals should be logged out
-	LOG_WEARABLE_DEVICES: false
+	LOG_WEARABLE_DEVICES: false,
+
+	// What the minimum rssi to accept before disconnecting
+	MINIMUM_RSSI_TO_STAY_CONNECTED: -1000,
+
+	// What is the minimum rssi to be considered in mid-range
+	SIGNAL_STRENGTH_MID_BREAKPOINT: -80,
+
+	// What is the minimum rssi to be considered in close-range
+	SIGNAL_STRENGTH_CLOSE_BREAKPOINT: -60
 };

@@ -77,7 +77,19 @@ noble.on('discover', function(peripheral) {
 			console.log("\t\tRSSI updated!");
 			console.log("\t\t\tCurrent rssi: " + rssi);
 
-			var strength = 0;
+			// Disconnect from feather if RSSI is too low
+			if (rssi < CONSTANTS.MINIMUM_RSSI_TO_STAY_CONNECTED) {
+				wearable.disconnect();
+				return;
+			}
+
+			// Default to cold
+			var strength = 3;
+
+			if (rssi > CONSTANTS.SIGNAL_STRENGTH_MID_BREAKPOINT)
+				strength = 2;
+			if (rssi > CONSTANTS.SIGNAL_STRENGTH_CLOSE_BREAKPOINT)
+				strength = 1;
 
 			callback(strength);
 		});
