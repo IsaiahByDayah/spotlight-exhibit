@@ -1,8 +1,8 @@
 var noble = require('noble');
 var _ = require('underscore');
+var Wearable = require('wearable-ble');
 
 var CONSTANTS = require('./constants.js');
-var Wearable = require('./wearable.js');
 
 //console.log(wearable);
 
