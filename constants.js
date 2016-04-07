@@ -21,8 +21,8 @@ module.exports = {
 	MINIMUM_RSSI_TO_STAY_CONNECTED: -1000,
 
 	// What is the minimum rssi to be considered in mid-range
-	SIGNAL_STRENGTH_MID_BREAKPOINT: -80,
+	SIGNAL_STRENGTH_MID_BREAKPOINT: -90,
 
 	// What is the minimum rssi to be considered in close-range
-	SIGNAL_STRENGTH_CLOSE_BREAKPOINT: -60
+	SIGNAL_STRENGTH_CLOSE_BREAKPOINT: -70
 };
