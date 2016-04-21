@@ -17,6 +17,9 @@ module.exports = {
 	// Flag for if discovered Feather peripherals should be logged out
 	LOG_WEARABLE_DEVICES: false,
 
+	// Flag for if exhibit should send a sample exhibitCheck message on socket connect
+	SEND_EXAMPLE_EXHIBIT_CHECK: false,
+
 	// What the minimum rssi to accept before disconnecting
 	MINIMUM_RSSI_TO_CONNECT: -500,
 

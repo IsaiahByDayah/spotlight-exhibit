@@ -18,6 +18,14 @@ var wearables = {};
 socket.on('connect', function(){
 	console.log(config.exhibitName + " connected to socket.");
 
+	if (CONSTANTS.SEND_EXAMPLE_EXHIBIT_CHECK) {
+		console.log("Sending sample check...");
+		socket.emit("ExhibitCheck", {
+			exhibitID: config.exhibitID,
+			userID: "Jon"
+		});
+	}
+
 	if (noble.state == "poweredOn") {
 		console.log(config.exhibitName + " starting to scan...");
 		noble.startScanning([], true);
@@ -34,17 +42,10 @@ socket.on('connect', function(){
 	});
 });
 
-socket.on('event', function(data){
-	console.log("Data: " + data);
-
-	/* TODO
-	- See if message is for me
-		- see what the response is for
-			- User Like Response
-				UserID: String
-				Result: Boolean
-					wearables[UserID]._likesExhibit = Result;
-	*/
+// Response for if the user should like this exhibit
+socket.on('Like', function(data){
+	// console.log("Data: ", data);
+	wearables[data.userID]._likesExhibit = data.userLikes;
 });
 
 socket.on('disconnect', function(){
