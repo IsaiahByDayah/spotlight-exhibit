@@ -18,9 +18,9 @@
   },
   "homepage": "https://github.com/jordankid93/spotlight-exhibit#readme",
   "dependencies": {
-    "noble": "^1.3.0",
+    "noble": "^1.4.0",
     "socket.io": "^1.4.5",
     "underscore": "^1.8.3",
-    "wearable-ble": "^1.0.5"
+    "wearable-ble": "^1.0.21"
   }
 }

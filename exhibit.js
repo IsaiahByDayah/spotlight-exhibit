@@ -4,23 +4,62 @@ var Wearable = require('wearable-ble');
 
 var CONSTANTS = require('./constants.js');
 
+var config = require('./config.js');
+
+var socket = require('socket.io-client')(CONSTANTS.SERVER_ENDPOINT);
+
 //console.log(wearable);
 
 // console.log(Feather);
 // console.log(Feather().isFeather);
 
-noble.on('stateChange', function(state) {
-	if (state === 'poweredOn') {
-		noble.startScanning();
-	} else {
-		noble.stopScanning();
+var wearables = {};
+
+socket.on('connect', function(){
+	console.log(config.exhibitName + " connected to socket.");
+
+	if (noble.state == "poweredOn") {
+		console.log(config.exhibitName + " starting to scan...");
+		noble.startScanning([], true);
 	}
+	noble.on('stateChange', function(state) {
+		console.log("Noble state changed...");
+		if (state === 'poweredOn') {
+			console.log(config.exhibitName + " starting to scan...");
+			noble.startScanning([], true);
+		} else {
+			noble.stopScanning();
+			console.log(config.exhibitName + " stopped scanning.");
+		}
+	});
+});
+
+socket.on('event', function(data){
+	console.log("Data: " + data);
+
+	/* TODO
+	- See if message is for me
+		- see what the response is for
+			- User Like Response
+				UserID: String
+				Result: Boolean
+					wearables[UserID]._likesExhibit = Result;
+	*/
+});
+
+socket.on('disconnect', function(){
+	// MARK: Not sure what to do in this case
 });
 
 noble.on('discover', function(peripheral) {
 
 	if (CONSTANTS.LOG_ALL_FOUND_DEVICES){
 		logPeripheral(peripheral);
+	}
+
+	// Only connect if within range
+	if (peripheral.rssi < CONSTANTS.MINIMUM_RSSI_TO_CONNECT) {
+		return;
 	}
 
   	// Check to see if peripheral is a wearable
@@ -34,6 +73,7 @@ noble.on('discover', function(peripheral) {
 		console.log("Wearable Found...");
 
 		console.log("\tCreating new Wearable object...");
+
 		var wearable = new Wearable(peripheral);
 
 		console.log("\t\tAdding event listeners...");
@@ -45,6 +85,15 @@ noble.on('discover', function(peripheral) {
 			}
 
 			console.log("\t\tWearable ready!");
+
+			wearables[wearable._userID] = wearable;
+
+			// See if user likes this exhibit
+
+			socket.emit("ExhibitCheck", {
+				exhibitID: config.exhibitID,
+				userID: wearable._userID
+			});
 		});
 
 		wearable.on("like", function(err){
@@ -55,6 +104,11 @@ noble.on('discover', function(peripheral) {
 			}
 
 			console.log("\t\tLike recieved!");
+
+			socket.emit("UserLikedExhibit", {
+				exhibitID: config.exhibitID,
+				userID: wearable._userID
+			});
 		});
 
 		wearable.on("dismiss", function(err){
@@ -65,6 +119,13 @@ noble.on('discover', function(peripheral) {
 			}
 
 			console.log("\t\tDismiss recieved!");
+
+			socket.emit("UserDismissedExhibit", {
+				exhibitID: config.exhibitID,
+				userID: wearable._userID
+			});
+
+			wearable._likesExhibit = false;
 		});
 
 		wearable.on("rssi", function(err, rssi, callback){
@@ -83,15 +144,17 @@ noble.on('discover', function(peripheral) {
 				return;
 			}
 
-			// Default to cold
-			var strength = 3;
+			if (wearable._likesExhibit) {
+				// Default to cold
+				var strength = 3;
 
-			if (rssi > CONSTANTS.SIGNAL_STRENGTH_MID_BREAKPOINT)
-				strength = 2;
-			if (rssi > CONSTANTS.SIGNAL_STRENGTH_CLOSE_BREAKPOINT)
-				strength = 1;
+				if (rssi > CONSTANTS.SIGNAL_STRENGTH_MID_BREAKPOINT)
+					strength = 2;
+				if (rssi > CONSTANTS.SIGNAL_STRENGTH_CLOSE_BREAKPOINT)
+					strength = 1;
 
-			callback(strength);
+				callback(strength);
+			}
 		});
 
 		wearable.on("disconnect", function(err){
@@ -102,11 +165,19 @@ noble.on('discover', function(peripheral) {
 			}
 
 			console.log("\t\tWearable disconnected!");
+
+			socket.emit("UserTimeAtExhibit", {
+				exhibitID: config.exhibitID,
+				userID: wearable._userID,
+				time: wearable._end - wearable._stop
+			});
+
+			delete wearables[wearable._userID];
 		});
 
 		console.log("\t\tSetting up wearable...");
 		wearable.setup();
-  	}
+	}
 });
 
 function logPeripheral(peripheral){

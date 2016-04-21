@@ -18,11 +18,17 @@ module.exports = {
 	LOG_WEARABLE_DEVICES: false,
 
 	// What the minimum rssi to accept before disconnecting
+	MINIMUM_RSSI_TO_CONNECT: -500,
+
+	// What the minimum rssi to accept in order to stay connected
 	MINIMUM_RSSI_TO_STAY_CONNECTED: -1000,
 
 	// What is the minimum rssi to be considered in mid-range
-	SIGNAL_STRENGTH_MID_BREAKPOINT: -90,
+	SIGNAL_STRENGTH_MID_BREAKPOINT: -75,
 
 	// What is the minimum rssi to be considered in close-range
-	SIGNAL_STRENGTH_CLOSE_BREAKPOINT: -70
+	SIGNAL_STRENGTH_CLOSE_BREAKPOINT: -65,
+
+	// Heroku endpoint to connect via Socket.io
+	SERVER_ENDPOINT: "https://jason-loves-boston.herokuapp.com/"
 };
