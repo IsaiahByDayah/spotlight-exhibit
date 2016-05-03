@@ -5,6 +5,7 @@ module.exports = {
 
 	// Peripheral ID of Feathers
 	// NOTE: Not sure if this is unique or not per device
+	// MARK: NOT USED IN CURRENT IMPLEMENTATION
 	WEARABLE_PERIPHERAL_ID: "f5ca9cca32ee48fdb72ff891e8682203",
 
 	// Readable name for Feathers

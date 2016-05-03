@@ -46,6 +46,10 @@ socket.on('connect', function(){
 socket.on('Like', function(data){
 	// console.log("Data: ", data);
 	wearables[data.userID]._likesExhibit = data.userLikes;
+
+	if (wearables[data.userID]._likesExhibit) {
+		wearables[data.userID].sendHaptic();
+	}
 });
 
 socket.on('disconnect', function(){
@@ -170,7 +174,7 @@ noble.on('discover', function(peripheral) {
 			socket.emit("UserTimeAtExhibit", {
 				exhibitID: config.exhibitID,
 				userID: wearable._userID,
-				time: wearable._end - wearable._stop
+				time: wearable._end - wearable._start
 			});
 
 			delete wearables[wearable._userID];
