@@ -92,16 +92,16 @@ noble.on('discover', function(peripheral) {
 
 			// See if user likes this exhibit
 
-			// socket.emit("ExhibitCheck", {
-			// 	exhibitID: config.exhibitID,
-			// 	userID: wearable._userID
-			// });
+			socket.emit("ExhibitCheck", {
+				exhibitID: config.exhibitID,
+				userID: wearable._userID
+			});
 
 			// Use testing like exhibit
-			handleUserLike({
-				userID: wearable._userID,
-				userLikes: true
-			});
+			// handleUserLike({
+			// 	userID: wearable._userID,
+			// 	userLikes: true
+			// });
 		});
 
 		wearable.on("like", function(err){
