@@ -28,13 +28,15 @@ socket.on('connect', function(){
 
 	if (noble.state == "poweredOn") {
 		console.log(config.exhibitName + " starting to scan...");
-		noble.startScanning([], true);
+		//noble.startScanning([], true);
+		noble.startScanning();
 	}
 	noble.on('stateChange', function(state) {
 		console.log("Noble state changed...");
 		if (state === 'poweredOn') {
 			console.log(config.exhibitName + " starting to scan...");
-			noble.startScanning([], true);
+			//noble.startScanning([], true);
+			noble.startScanning();
 		} else {
 			noble.stopScanning();
 			console.log(config.exhibitName + " stopped scanning.");
@@ -44,12 +46,7 @@ socket.on('connect', function(){
 
 // Response for if the user should like this exhibit
 socket.on('Like', function(data){
-	// console.log("Data: ", data);
-	wearables[data.userID]._likesExhibit = data.userLikes;
-
-	if (wearables[data.userID]._likesExhibit) {
-		wearables[data.userID].sendHaptic();
-	}
+	handleUserLike(data);
 });
 
 socket.on('disconnect', function(){
@@ -95,9 +92,15 @@ noble.on('discover', function(peripheral) {
 
 			// See if user likes this exhibit
 
-			socket.emit("ExhibitCheck", {
-				exhibitID: config.exhibitID,
-				userID: wearable._userID
+			// socket.emit("ExhibitCheck", {
+			// 	exhibitID: config.exhibitID,
+			// 	userID: wearable._userID
+			// });
+
+			// Use testing like exhibit
+			handleUserLike({
+				userID: wearable._userID,
+				userLikes: true
 			});
 		});
 
@@ -184,6 +187,15 @@ noble.on('discover', function(peripheral) {
 		wearable.setup();
 	}
 });
+
+function handleUserLike(data){
+	// console.log("Data: ", data);
+	wearables[data.userID]._likesExhibit = data.userLikes;
+
+	if (wearables[data.userID]._likesExhibit) {
+		wearables[data.userID].sendHaptic(3);
+	}
+}
 
 function logPeripheral(peripheral){
 	console.log('peripheral discovered - ' + peripheral.id +
