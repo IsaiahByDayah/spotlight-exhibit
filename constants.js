@@ -46,7 +46,7 @@ module.exports = {
 	MINIMUM_DISTANCE_FOR_CLOSE: 4,
 
 	// How long to wait between trying to connect to one device before trying again
-	SECONDS_BETWEEN_CONNECTS: 10,
+	SECONDS_BETWEEN_CONNECTS: 25,
 
 	// Heroku endpoint to connect via Socket.io
 	SERVER_ENDPOINT: "https://jason-loves-boston.herokuapp.com/"

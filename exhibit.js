@@ -77,6 +77,10 @@ noble.on('discover', function(peripheral) {
 		return;
 	}
 
+	// if (calculateDistance(peripheral.rssi, peripheral.advertisement.txPowerLevel) < CONSTANTS.MINIMUM_DISTANCE_TO_CONNECT) {
+	// 	return;
+	// }
+
 	if (connectedBefore[peripheral.id]) {
 		if (new Date().getTime() < connectedBefore[peripheral.id]+(CONSTANTS.SECONDS_BETWEEN_CONNECTS*1000)) {
 			// console.log("Too recent to last connect");
@@ -173,29 +177,29 @@ noble.on('discover', function(peripheral) {
 
 			if (wearable._userID && wearables[wearable._userID]) {
 				// Disconnect from feather if RSSI is too low
-				// if (rssi < CONSTANTS.MINIMUM_RSSI_TO_STAY_CONNECTED) {
-				// 	wearable.disconnect();
-				// 	return;
-				// }
-
-				if (distance > CONSTANTS.MAXIMUM_DISTANCE_TO_STAY_CONNECTED) {
+				if (rssi < CONSTANTS.MINIMUM_RSSI_TO_STAY_CONNECTED) {
 					wearable.disconnect();
 					return;
 				}
+
+				// if (distance > CONSTANTS.MAXIMUM_DISTANCE_TO_STAY_CONNECTED) {
+				// 	wearable.disconnect();
+				// 	return;
+				// }
 
 				if (wearable._likesExhibit) {
 					// Default to cold
 					var strength = 3;
 
-					// if (rssi > CONSTANTS.SIGNAL_STRENGTH_MID_BREAKPOINT)
-					// 	strength = 2;
-					// if (rssi > CONSTANTS.SIGNAL_STRENGTH_CLOSE_BREAKPOINT)
-					// 	strength = 1;
-
-					if (distance < CONSTANTS.MINIMUM_DISTANCE_FOR_MID)
+					if (rssi > CONSTANTS.SIGNAL_STRENGTH_MID_BREAKPOINT)
 						strength = 2;
-					if (distance > CONSTANTS.MINIMUM_DISTANCE_FOR_CLOSE)
+					if (rssi > CONSTANTS.SIGNAL_STRENGTH_CLOSE_BREAKPOINT)
 						strength = 1;
+
+					// if (distance < CONSTANTS.MINIMUM_DISTANCE_FOR_MID)
+					// 	strength = 2;
+					// if (distance > CONSTANTS.MINIMUM_DISTANCE_FOR_CLOSE)
+					// 	strength = 1;
 
 					callback(strength);
 				}
