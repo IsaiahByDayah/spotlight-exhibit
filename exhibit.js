@@ -75,7 +75,7 @@ noble.on('discover', function(peripheral) {
 	}
 
 	if (connectedBefore[peripheral.id]) {
-		if (new Date().getTime() < connectedBefore[peripheral.id]+(30*1000)) {
+		if (new Date().getTime() < connectedBefore[peripheral.id]+(CONSTANTS.SECONDS_BETWEEN_CONNECTS*1000)) {
 			// console.log("Too recent to last connect");
 			return;
 		}
@@ -107,11 +107,6 @@ noble.on('discover', function(peripheral) {
 
 			if (err) {
 				console.log("\t\tError on ready: " + err.message);
-
-				if (wearable._feather._peripheral.id == "beb6acd0bbfe442b83f5d49644a5ec30") {
-					wearable.sendHaptic(10);
-				}
-
 				wearable.disconnect();
 				return;
 			}
@@ -120,22 +115,11 @@ noble.on('discover', function(peripheral) {
 
 			wearables[wearable._userID] = wearable;
 
-			if (wearable._feather._peripheral.id == "beb6acd0bbfe442b83f5d49644a5ec30") {
-				wearable.sendHaptic(10);
-			}
-
 			// See if user likes this exhibit
-
 			socket.emit("ExhibitCheck", {
 				exhibitNumber: config.exhibitNumber,
 				userID: wearable._userID
 			});
-
-			// Use testing like exhibit
-			// handleUserLike({
-			// 	userID: wearable._userID,
-			// 	userLikes: true
-			// });
 		});
 
 		wearable.on("like", function(err){
@@ -232,6 +216,9 @@ noble.on('discover', function(peripheral) {
 
 function handleUserLike(data){
 	// console.log("Data: ", data);
+
+	console.log("Does user " + data.userID + " like the " + config.exhibitName + " exhibit? " + data.userLikes);
+
 	wearables[data.userID]._likesExhibit = data.userLikes;
 
 	if (wearables[data.userID]._likesExhibit) {
