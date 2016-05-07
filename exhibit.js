@@ -229,7 +229,22 @@ function handleUserLike(data){
 function restartScanning() {
 	console.log("Restarting scanning.");
 	noble.stopScanning();
-	noble.startScanning([], true);
+	if (noble.state == "poweredOn") {
+		console.log(config.exhibitName + " starting to scan...");
+		noble.startScanning([], true);
+		// noble.startScanning();
+	}
+	noble.on('stateChange', function(state) {
+		console.log("Noble state changed...");
+		if (state === 'poweredOn') {
+			console.log(config.exhibitName + " starting to scan...");
+			noble.startScanning([], true);
+			// noble.startScanning();
+		} else {
+			noble.stopScanning();
+			console.log(config.exhibitName + " stopped scanning.");
+		}
+	});
 	//noble.startScanning();
 }
 
