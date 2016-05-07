@@ -57,6 +57,13 @@ socket.on('disconnect', function(){
 	// MARK: Not sure what to do in this case
 });
 
+noble.on('warning', function(nessage){
+	console.log("Warning occured, restarting scanning...");
+	noble.stopScanning();
+	noble.startScanning([], true);
+	//noble.startScanning();
+});
+
 noble.on('discover', function(peripheral) {
 
 	if (CONSTANTS.LOG_ALL_FOUND_DEVICES){
