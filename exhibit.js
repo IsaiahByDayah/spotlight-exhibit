@@ -13,6 +13,8 @@ var socket = require('socket.io-client')(CONSTANTS.SERVER_ENDPOINT);
 // console.log(Feather);
 // console.log(Feather().isFeather);
 
+// Test Change
+
 var wearables = {};
 
 socket.on('connect', function(){
