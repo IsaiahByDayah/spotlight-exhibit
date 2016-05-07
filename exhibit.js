@@ -17,6 +17,8 @@ var socket = require('socket.io-client')(CONSTANTS.SERVER_ENDPOINT);
 
 var wearables = {};
 
+var connectedBefore = {}; // id : last_connect_epoch
+
 socket.on('connect', function(){
 	console.log(config.exhibitName + " connected to socket.");
 
@@ -30,15 +32,15 @@ socket.on('connect', function(){
 
 	if (noble.state == "poweredOn") {
 		console.log(config.exhibitName + " starting to scan...");
-		//noble.startScanning([], true);
-		noble.startScanning();
+		noble.startScanning([], true);
+		// noble.startScanning();
 	}
 	noble.on('stateChange', function(state) {
 		console.log("Noble state changed...");
 		if (state === 'poweredOn') {
 			console.log(config.exhibitName + " starting to scan...");
-			//noble.startScanning([], true);
-			noble.startScanning();
+			noble.startScanning([], true);
+			// noble.startScanning();
 		} else {
 			noble.stopScanning();
 			console.log(config.exhibitName + " stopped scanning.");
@@ -66,6 +68,14 @@ noble.on('discover', function(peripheral) {
 		return;
 	}
 
+	if (connectedBefore[peripheral.id]) {
+		if (new Date().getTime() < connectedBefore[peripheral.id]+(30*1000)) {
+			console.log("Too recent to last connect");
+			return;
+		}
+	}
+	connectedBefore[peripheral.id] = new Date().getTime();
+
   	// Check to see if peripheral is a wearable
   	if (new Wearable().isWearable(peripheral)) {
 	// if (Feather.isFeather(peripheral)) {
@@ -74,7 +84,13 @@ noble.on('discover', function(peripheral) {
 			logPeripheral(peripheral);
 		}
 
+		console.log(peripheral.id);
+
 		console.log("Wearable Found...");
+
+
+
+		console.log("ID - " + peripheral.id);
 
 		console.log("\tCreating new Wearable object...");
 
@@ -85,6 +101,11 @@ noble.on('discover', function(peripheral) {
 
 			if (err) {
 				console.log("\t\tError on ready: " + err.message);
+
+				if (wearable._feather._peripheral.id == "beb6acd0bbfe442b83f5d49644a5ec30") {
+					wearable.sendHaptic(10);
+				}
+
 				wearable.disconnect();
 				return;
 			}
@@ -92,6 +113,10 @@ noble.on('discover', function(peripheral) {
 			console.log("\t\tWearable ready!");
 
 			wearables[wearable._userID] = wearable;
+
+			if (wearable._feather._peripheral.id == "beb6acd0bbfe442b83f5d49644a5ec30") {
+				wearable.sendHaptic(10);
+			}
 
 			// See if user likes this exhibit
 
@@ -188,6 +213,8 @@ noble.on('discover', function(peripheral) {
 
 				delete wearables[wearable._userID];
 			}
+
+			connectedBefore[peripheral.id] = new Date().getTime();
 		});
 
 		console.log("\t\tSetting up wearable...");
