@@ -65,6 +65,9 @@ noble.on('warning', function(nessage){
 
 noble.on('discover', function(peripheral) {
 
+	// console.log(peripheral);
+	// return;
+
 	if (CONSTANTS.LOG_ALL_FOUND_DEVICES){
 		logPeripheral(peripheral);
 	}
@@ -90,7 +93,7 @@ noble.on('discover', function(peripheral) {
 			logPeripheral(peripheral);
 		}
 
-		console.log(peripheral.id);
+		// console.log(peripheral.id);
 
 		console.log("Wearable Found...");
 
@@ -164,9 +167,18 @@ noble.on('discover', function(peripheral) {
 			console.log("\t\tRSSI updated!");
 			console.log("\t\t\tCurrent rssi: " + rssi);
 
+			var distance = calculateDistance(rssi, wearable._feather._peripheral.advertisement.txPowerLevel);
+
+			console.log("\t\t\tDistance: " + distance + "ft");
+
 			if (wearable._userID && wearables[wearable._userID]) {
 				// Disconnect from feather if RSSI is too low
-				if (rssi < CONSTANTS.MINIMUM_RSSI_TO_STAY_CONNECTED) {
+				// if (rssi < CONSTANTS.MINIMUM_RSSI_TO_STAY_CONNECTED) {
+				// 	wearable.disconnect();
+				// 	return;
+				// }
+
+				if (distance > CONSTANTS.MAXIMUM_DISTANCE_TO_STAY_CONNECTED) {
 					wearable.disconnect();
 					return;
 				}
@@ -175,9 +187,14 @@ noble.on('discover', function(peripheral) {
 					// Default to cold
 					var strength = 3;
 
-					if (rssi > CONSTANTS.SIGNAL_STRENGTH_MID_BREAKPOINT)
+					// if (rssi > CONSTANTS.SIGNAL_STRENGTH_MID_BREAKPOINT)
+					// 	strength = 2;
+					// if (rssi > CONSTANTS.SIGNAL_STRENGTH_CLOSE_BREAKPOINT)
+					// 	strength = 1;
+
+					if (distance < CONSTANTS.MINIMUM_DISTANCE_FOR_MID)
 						strength = 2;
-					if (rssi > CONSTANTS.SIGNAL_STRENGTH_CLOSE_BREAKPOINT)
+					if (distance > CONSTANTS.MINIMUM_DISTANCE_FOR_CLOSE)
 						strength = 1;
 
 					callback(strength);
@@ -202,6 +219,8 @@ noble.on('discover', function(peripheral) {
 					time: wearable._end - wearable._start
 				});
 
+				console.log("Submitted distance: " + wearable._end - wearable._start);
+
 				delete wearables[wearable._userID];
 			}
 
@@ -223,6 +242,9 @@ function handleUserLike(data){
 
 	if (wearables[data.userID]._likesExhibit) {
 		wearables[data.userID].sendHaptic(3);
+	}
+	else {
+		wearables[data.userID].disconnect();
 	}
 }
 
@@ -246,6 +268,26 @@ function restartScanning() {
 		}
 	});
 	//noble.startScanning();
+}
+
+function calculateDistance(rssi, tx) {
+
+	var txPower = tx || -59; //hard coded power value. Usually ranges between -59 to -65
+
+	if (tx) console.log("Tx provided: " + txPower);
+
+	if (rssi == 0) {
+		return -1.0;
+	}
+
+	var ratio = rssi*1.0/txPower;
+	if (ratio < 1.0) {
+		return Math.pow(ratio,10);
+	}
+	else {
+		var distance =  (0.89976)*Math.pow(ratio,7.7095) + 0.111;    
+		return distance;
+	}
 }
 
 function logPeripheral(peripheral){

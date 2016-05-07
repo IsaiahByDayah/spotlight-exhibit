@@ -24,17 +24,29 @@ module.exports = {
 	// What the minimum rssi to accept before disconnecting
 	MINIMUM_RSSI_TO_CONNECT: -70,
 
+	// What the minimum distance to accept before disconnecting
+	MINIMUM_DISTANCE_TO_CONNECT: 2.5,
+
 	// What the minimum rssi to accept in order to stay connected
-	MINIMUM_RSSI_TO_STAY_CONNECTED: -90,
+	MINIMUM_RSSI_TO_STAY_CONNECTED: -80,
+
+	// What the minimum rssi to accept in order to stay connected
+	MAXIMUM_DISTANCE_TO_STAY_CONNECTED: 10,
 
 	// What is the minimum rssi to be considered in mid-range
 	SIGNAL_STRENGTH_MID_BREAKPOINT: -75,
 
+	// What is the minimum distance to be considered in mid-range
+	MINIMUM_DISTANCE_FOR_MID: 6,
+
 	// What is the minimum rssi to be considered in close-range
 	SIGNAL_STRENGTH_CLOSE_BREAKPOINT: -60,
 
+	// What is the minimum distance to be considered in mid-range
+	MINIMUM_DISTANCE_FOR_CLOSE: 3,
+
 	// How long to wait between trying to connect to one device before trying again
-	SECONDS_BETWEEN_CONNECTS: 5,
+	SECONDS_BETWEEN_CONNECTS: 10,
 
 	// Heroku endpoint to connect via Socket.io
 	SERVER_ENDPOINT: "https://jason-loves-boston.herokuapp.com/"
