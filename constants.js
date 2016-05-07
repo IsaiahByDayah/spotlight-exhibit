@@ -22,13 +22,13 @@ module.exports = {
 	SEND_EXAMPLE_EXHIBIT_CHECK: false,
 
 	// What the minimum rssi to accept before disconnecting
-	MINIMUM_RSSI_TO_CONNECT: -60,
+	MINIMUM_RSSI_TO_CONNECT: -100,
 
 	// What the minimum rssi to accept in order to stay connected
-	MINIMUM_RSSI_TO_STAY_CONNECTED: -70,
+	MINIMUM_RSSI_TO_STAY_CONNECTED: -90,
 
 	// What is the minimum rssi to be considered in mid-range
-	SIGNAL_STRENGTH_MID_BREAKPOINT: -65,
+	SIGNAL_STRENGTH_MID_BREAKPOINT: -75,
 
 	// What is the minimum rssi to be considered in close-range
 	SIGNAL_STRENGTH_CLOSE_BREAKPOINT: -55,
