@@ -58,11 +58,10 @@ socket.on('disconnect', function(){
 });
 
 noble.on('warning', function(nessage){
-	console.log("Warning occured, restarting scanning...");
-	noble.stopScanning();
-	noble.startScanning([], true);
-	//noble.startScanning();
+	console.log("Warning occured...");
+	restartScanning();
 });
+
 
 noble.on('discover', function(peripheral) {
 
@@ -206,6 +205,7 @@ noble.on('discover', function(peripheral) {
 
 			if (err) {
 				console.log("\t\tError on disconnect: " + err.message);
+				restartScanning();
 				return;
 			}
 
@@ -222,6 +222,7 @@ noble.on('discover', function(peripheral) {
 			}
 
 			connectedBefore[peripheral.id] = new Date().getTime();
+			restartScanning();
 		});
 
 		console.log("\t\tSetting up wearable...");
@@ -236,6 +237,13 @@ function handleUserLike(data){
 	if (wearables[data.userID]._likesExhibit) {
 		wearables[data.userID].sendHaptic(3);
 	}
+}
+
+function restartScanning() {
+	console.log("Restarting scanning.");
+	noble.stopScanning();
+	noble.startScanning([], true);
+	//noble.startScanning();
 }
 
 function logPeripheral(peripheral){
