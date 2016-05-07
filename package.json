@@ -19,7 +19,7 @@
   "homepage": "https://github.com/jordankid93/spotlight-exhibit#readme",
   "dependencies": {
     "noble": "^1.5.0",
-    "socket.io": "^1.4.6",
+    "socket.io-client": "^1.4.6",
     "underscore": "^1.8.3",
     "wearable-ble": "^1.0.4"
   }
