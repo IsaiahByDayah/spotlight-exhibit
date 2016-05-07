@@ -149,22 +149,24 @@ noble.on('discover', function(peripheral) {
 			console.log("\t\tRSSI updated!");
 			console.log("\t\t\tCurrent rssi: " + rssi);
 
-			// Disconnect from feather if RSSI is too low
-			if (rssi < CONSTANTS.MINIMUM_RSSI_TO_STAY_CONNECTED) {
-				wearable.disconnect();
-				return;
-			}
+			if (wearable._userID && wearables[wearable._userID]) {
+				// Disconnect from feather if RSSI is too low
+				if (rssi < CONSTANTS.MINIMUM_RSSI_TO_STAY_CONNECTED) {
+					wearable.disconnect();
+					return;
+				}
 
-			if (wearable._likesExhibit) {
-				// Default to cold
-				var strength = 3;
+				if (wearable._likesExhibit) {
+					// Default to cold
+					var strength = 3;
 
-				if (rssi > CONSTANTS.SIGNAL_STRENGTH_MID_BREAKPOINT)
-					strength = 2;
-				if (rssi > CONSTANTS.SIGNAL_STRENGTH_CLOSE_BREAKPOINT)
-					strength = 1;
+					if (rssi > CONSTANTS.SIGNAL_STRENGTH_MID_BREAKPOINT)
+						strength = 2;
+					if (rssi > CONSTANTS.SIGNAL_STRENGTH_CLOSE_BREAKPOINT)
+						strength = 1;
 
-				callback(strength);
+					callback(strength);
+				}
 			}
 		});
 
@@ -177,13 +179,15 @@ noble.on('discover', function(peripheral) {
 
 			console.log("\t\tWearable disconnected!");
 
-			socket.emit("UserTimeAtExhibit", {
-				exhibitNumber: config.exhibitNumber,
-				userID: wearable._userID,
-				time: wearable._end - wearable._start
-			});
+			if (wearable._userID && wearables[wearable._userID]) {
+				socket.emit("UserTimeAtExhibit", {
+					exhibitNumber: config.exhibitNumber,
+					userID: wearable._userID,
+					time: wearable._end - wearable._start
+				});
 
-			delete wearables[wearable._userID];
+				delete wearables[wearable._userID];
+			}
 		});
 
 		console.log("\t\tSetting up wearable...");
