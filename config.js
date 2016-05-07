@@ -4,8 +4,8 @@ module.exports = {
 	*/
 
 	// Readable name for this exhibit
-	exhibitName: "Sample Exhibit",
+	exhibitName: "Rock",
 
 	// Unique ID for this exhibit
-	exhibitID: "abc"
+	exhibitNumber: 1
 };

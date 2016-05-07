@@ -23,7 +23,7 @@ socket.on('connect', function(){
 	if (CONSTANTS.SEND_EXAMPLE_EXHIBIT_CHECK) {
 		console.log("Sending sample check...");
 		socket.emit("ExhibitCheck", {
-			exhibitID: config.exhibitID,
+			exhibitNumber: config.exhibitNumber,
 			userID: "Jon"
 		});
 	}
@@ -95,7 +95,7 @@ noble.on('discover', function(peripheral) {
 			// See if user likes this exhibit
 
 			socket.emit("ExhibitCheck", {
-				exhibitID: config.exhibitID,
+				exhibitNumber: config.exhibitNumber,
 				userID: wearable._userID
 			});
 
@@ -116,7 +116,7 @@ noble.on('discover', function(peripheral) {
 			console.log("\t\tLike recieved!");
 
 			socket.emit("UserLikedExhibit", {
-				exhibitID: config.exhibitID,
+				exhibitNumber: config.exhibitNumber,
 				userID: wearable._userID
 			});
 		});
@@ -131,7 +131,7 @@ noble.on('discover', function(peripheral) {
 			console.log("\t\tDismiss recieved!");
 
 			socket.emit("UserDismissedExhibit", {
-				exhibitID: config.exhibitID,
+				exhibitNumber: config.exhibitNumber,
 				userID: wearable._userID
 			});
 
@@ -177,7 +177,7 @@ noble.on('discover', function(peripheral) {
 			console.log("\t\tWearable disconnected!");
 
 			socket.emit("UserTimeAtExhibit", {
-				exhibitID: config.exhibitID,
+				exhibitNumber: config.exhibitNumber,
 				userID: wearable._userID,
 				time: wearable._end - wearable._start
 			});
