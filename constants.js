@@ -25,7 +25,7 @@ module.exports = {
 	MINIMUM_RSSI_TO_CONNECT: -70,
 
 	// What the minimum distance to accept before disconnecting
-	MINIMUM_DISTANCE_TO_CONNECT: 2.5,
+	MINIMUM_DISTANCE_TO_CONNECT: 10,
 
 	// What the minimum rssi to accept in order to stay connected
 	MINIMUM_RSSI_TO_STAY_CONNECTED: -80,
@@ -37,13 +37,13 @@ module.exports = {
 	SIGNAL_STRENGTH_MID_BREAKPOINT: -75,
 
 	// What is the minimum distance to be considered in mid-range
-	MINIMUM_DISTANCE_FOR_MID: 6,
+	MINIMUM_DISTANCE_FOR_MID: 7.5,
 
 	// What is the minimum rssi to be considered in close-range
 	SIGNAL_STRENGTH_CLOSE_BREAKPOINT: -60,
 
 	// What is the minimum distance to be considered in mid-range
-	MINIMUM_DISTANCE_FOR_CLOSE: 3,
+	MINIMUM_DISTANCE_FOR_CLOSE: 4,
 
 	// How long to wait between trying to connect to one device before trying again
 	SECONDS_BETWEEN_CONNECTS: 10,
