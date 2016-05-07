@@ -34,7 +34,7 @@ module.exports = {
 	SIGNAL_STRENGTH_CLOSE_BREAKPOINT: -55,
 
 	// How long to wait between trying to connect to one device before trying again
-	SECONDS_BETWEEN_CONNECTS: 20,
+	SECONDS_BETWEEN_CONNECTS: 5,
 
 	// Heroku endpoint to connect via Socket.io
 	SERVER_ENDPOINT: "https://jason-loves-boston.herokuapp.com/"
