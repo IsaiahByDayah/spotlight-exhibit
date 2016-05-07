@@ -85,6 +85,7 @@ noble.on('discover', function(peripheral) {
 
 			if (err) {
 				console.log("\t\tError on ready: " + err.message);
+				wearable.disconnect();
 				return;
 			}
 
