@@ -70,7 +70,7 @@ noble.on('discover', function(peripheral) {
 
 	if (connectedBefore[peripheral.id]) {
 		if (new Date().getTime() < connectedBefore[peripheral.id]+(30*1000)) {
-			console.log("Too recent to last connect");
+			// console.log("Too recent to last connect");
 			return;
 		}
 	}
